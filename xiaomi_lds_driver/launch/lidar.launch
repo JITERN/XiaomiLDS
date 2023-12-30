@@ -1,0 +1,6 @@
+<launch>
+  <node name="xiaomi_lds_driver" pkg="xiaomi_lds_driver" type="xiaomi_lds_driver.py"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="lidar_to_base" args="0 0 1 0 3.14159 0 base_footprint lidar_frame" />
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find xiaomi_lds_driver)/config.rviz" />
+  
+</launch>
