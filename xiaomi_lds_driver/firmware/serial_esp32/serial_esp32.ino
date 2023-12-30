@@ -38,7 +38,12 @@ bool waitPacket = true;         // true if waiting for a packet
 #define M_PIN1 12
 #define M_PIN2 13
 
-int PWM = 200;
+int PWM = 180;
+int goal_speed = 250;//rpm
+
+
+TaskHandle_t Task1;
+TaskHandle_t Task2;
 
 void setup() {
 //  lidar.begin(115200);
@@ -50,10 +55,27 @@ void setup() {
   analogWrite(M_PIN1,PWM);
   digitalWrite(M_PIN2,LOW);
 
+
+  xTaskCreatePinnedToCore(Task1code,"Task1",10000,NULL,1,&Task1,0);                         
+  delay(500); 
+
+  xTaskCreatePinnedToCore(Task2code,"Task2",10000,NULL,1,&Task2,1);          
+  delay(500); 
 }
 
-void loop() {  
+void Task1code( void * parameter ){ //simple control loop
+  for(;;){
+  if (data[1]<goal_speed){PWM++;}
+  else if (data[1]>goal_speed){PWM--;}
+  analogWrite(M_PIN1,PWM);
+  delay(500);
+  }
+}
+
+
+void Task2code( void * parameter ){  //read and process Lidar data
     // check if any packet if arrived
+   for(;;){
     if (lidar.available() > 0) {
         receivedByte = lidar.read();
 //        Serial.print(receivedByte,HEX);
@@ -89,6 +111,7 @@ void loop() {
         }
 
     }
+   }
 
 }
 
@@ -164,5 +187,6 @@ uint16_t checksum(uint8_t packet[], uint16_t sum, uint8_t size)
     return  (uint16_t) (checksum & 0x7FFF) == sum;
 }
 
-
-//TODO: PID loop
+void loop() {
+  
+}
